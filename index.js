@@ -10,7 +10,7 @@ var s3 = new aws.S3();
  * For each path, download HTML markup
  */
 function getMarkup(opts, callback) {
-  async.parallel(
+  async.parallelLimit(
     opts.routes.map(path => cb => lambda.invoke({
       FunctionName: opts.packageConfig.lambdaFunctionName,
       Payload: JSON.stringify(apiGatewayRequest({path}))
@@ -24,6 +24,7 @@ function getMarkup(opts, callback) {
         path
       });
     })),
+    3,
     callback
   );
 }
@@ -32,8 +33,7 @@ function getMarkup(opts, callback) {
  * Given an array of html, save them to S3
  */
 function writeMarkup(opts, markup, callback) {
-  console.log(markup);
-  async.parallel(
+  async.parallelLimit(
     markup.map(item => cb => s3.putObject({
       Body: item.markup,
       Bucket: opts.packageConfig.s3BucketName,
@@ -41,6 +41,7 @@ function writeMarkup(opts, markup, callback) {
       ACL: 'public-read',
       ContentType: 'text/html'
     }, cb)),
+    3,
     callback
   );
 }
