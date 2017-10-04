@@ -3,13 +3,11 @@ var aws = require('aws-sdk');
 var apiGatewayRequest = require('./api-gateway-request.js');
 var assert = require('assert');
 
-var lambda = new aws.Lambda();
-var s3 = new aws.S3();
-
 /*
  * For each path, download HTML markup
  */
 function getMarkup(opts, callback) {
+  var lambda = new aws.Lambda({ region: opts.packageConfig.lambdaRegion });
   async.parallelLimit(
     opts.routes.map(path => cb => lambda.invoke({
       FunctionName: opts.packageConfig.lambdaFunctionName,
@@ -33,6 +31,7 @@ function getMarkup(opts, callback) {
  * Given an array of html, save them to S3
  */
 function writeMarkup(opts, markup, callback) {
+  var s3 = new aws.S3();
   async.parallelLimit(
     markup.map(item => cb => s3.putObject({
       Body: item.markup,
@@ -60,6 +59,10 @@ exports.handler = (event, context, callback) => {
   assert.ok(
     packageConfig.s3BucketName,
     'packageConfig.s3BucketName should be defined'
+  );
+  assert.ok(
+    packageConfig.lambdaRegion,
+    'packageConfig.lambdaRegion should be defined'
   );
 
   async.waterfall([
