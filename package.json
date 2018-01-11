@@ -5,7 +5,7 @@
   "main": "index.js",
   "config": {
     "lambdaFunctionName": "StaticPublisher",
-    "region": "us-west-1",
+    "region": "us-east-1",
     "s3BucketName": "cb-lambdas"
   },
   "author": "",
@@ -15,9 +15,6 @@
     "aws-sdk": "^2.86.0"
   },
   "scripts": {
-    "zip": "zip -q -r lambda.zip ./*",
-    "upload": "aws s3 cp lambda.zip s3://$npm_package_config_s3BucketName/$npm_package_config_lambdaFunctionName/lambda.zip --region $npm_package_config_region --acl private",
-    "update": "aws lambda update-function-code --function-name $npm_package_config_lambdaFunctionName --region $npm_package_config_region --s3-bucket $npm_package_config_s3BucketName --s3-key $npm_package_config_lambdaFunctionName/lambda.zip",
-    "deploy": "npm run zip && npm run upload && npm run update"
+    "deploy": "serverless deploy -f main"
   }
 }
